@@ -4,11 +4,14 @@ import { PrismaClient, users } from "@prisma/client";
 export class AuthService {
   private prisma = new PrismaClient();
 
-  public async getUserByEmail(email: string): Promise<users | null> {
-    return this.prisma.users.findUnique({
-      where: { email },
+  public async getUserByEmail(usernameOrEmail: string): Promise<users | null> {
+    return this.prisma.users.findFirst({
+      where: {
+        OR: [{ username: usernameOrEmail }, { email: usernameOrEmail }],
+      },
     });
   }
+
   public async registerUser(data: User): Promise<users> {
     return this.prisma.users.create({
       data: {
@@ -17,6 +20,12 @@ export class AuthService {
         password: data.password,
         role_id: Number(data.role_id),
       },
+    });
+  }
+
+  public async getUserById(id: number): Promise<users | null> {
+    return this.prisma.users.findUnique({
+      where: { id },
     });
   }
 }
