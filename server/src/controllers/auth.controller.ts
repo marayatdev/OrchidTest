@@ -110,7 +110,7 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      ResponseFormatter.success(res, accessToken, "Login successful");
+      ResponseFormatter.success(res, user, "Login successful");
     } catch (err) {
       logger.error("Login failed:", err);
       res.status(500).json({ message: "Internal server error" });

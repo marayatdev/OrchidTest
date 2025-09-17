@@ -10,7 +10,7 @@ import { logger } from "./utils/logger";
 import { connectDB } from "./config/prisma";
 import dotenv from "dotenv";
 
-dotenv.config(); // โหลด .env
+dotenv.config();
 
 class App {
   public app: Application;
@@ -26,7 +26,7 @@ class App {
   private setMiddlewares(): void {
     this.app.use(
       cors({
-        origin: "http://localhost:5173",
+        origin: "http://localhost:3000",
         credentials: true,
       })
     );
