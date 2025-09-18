@@ -19,7 +19,7 @@ export default function Home() {
         </CardHeader>
 
         <CardContent>
-          {isRegister ? <RegisterForm /> : <LoginForm />}
+          {isRegister ? <RegisterForm onRegisterSuccess={() => setIsRegister(false)} /> : <LoginForm />}
         </CardContent>
 
         <CardFooter className="flex-col gap-4">

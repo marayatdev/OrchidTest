@@ -12,14 +12,16 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-
+import api from "@/lib/axios"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner";
 const registerSchema = z
     .object({
         username: z.string().min(3, "Username ต้องมีอย่างน้อย 3 ตัวอักษร"),
         email: z.string().email("Email ไม่ถูกต้อง"),
         password: z.string().min(6, "Password ต้องมีอย่างน้อย 6 ตัวอักษร"),
         confirmPassword: z.string(),
-        role: z.string().min(1, "กรุณาเลือกบทบาท"),
+        role_id: z.number().min(1, "กรุณาเลือกบทบาท"),
     })
     .refine((data) => data.password === data.confirmPassword, {
         message: "รหัสผ่านไม่ตรงกัน",
@@ -27,15 +29,27 @@ const registerSchema = z
     })
 
 type RegisterFormData = z.infer<typeof registerSchema>
+type RegisterFormProps = {
+    onRegisterSuccess: () => void;
+}
 
-export default function RegisterForm() {
+export default function RegisterForm({ onRegisterSuccess }: RegisterFormProps) {
+    const router = useRouter()
     const { register, handleSubmit, formState: { errors }, setValue } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
     })
 
-    const onSubmit = (data: RegisterFormData) => {
-        console.log("Register Data:", data)
-        alert("สมัครสมาชิกเรียบร้อย ✅")
+    const onSubmit = async (data: RegisterFormData) => {
+        try {
+            const response = await api.post('/auth/register', data);
+            if (response.data.status === 200) {
+                toast.success("สมัครสมาชิกสำเร็จ");
+                onRegisterSuccess();
+            }
+        } catch (err) {
+            console.log(err);
+            toast.error("เกิดข้อผิดพลาดในการสมัครสมาชิก");
+        }
     }
 
     return (
@@ -68,16 +82,16 @@ export default function RegisterForm() {
 
             <div>
                 <label className="text-sm font-medium text-gray-700">บทบาท</label>
-                <Select onValueChange={(value) => setValue("role", value)}>
+                <Select onValueChange={(value) => setValue("role_id", parseInt(value))}>
                     <SelectTrigger className="w-full">
                         <SelectValue placeholder="เลือกบทบาท" />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="admin">Admin</SelectItem>
-                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="1">Admin</SelectItem>
+                        <SelectItem value="2">User</SelectItem>
                     </SelectContent>
                 </Select>
-                {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
+                {errors.role_id && <p className="text-red-500 text-sm">{errors.role_id.message}</p>}
             </div>
 
             <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">

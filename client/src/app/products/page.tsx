@@ -3,28 +3,24 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useUser } from "@/context/UserContext"
+import DefaultUiComponent from "@/components/Layout/Default"
 
 export default function ProductsPage() {
     const { user, loading } = useUser()
     const router = useRouter()
 
-    console.log("user in ProductsPage:", user);
-
     useEffect(() => {
         if (!loading) {
-            if (!user || user.role_id !== "2") {
+            if (!user || user?.role_id !== 1) {
                 router.replace("/home")
             }
         }
     }, [user, loading, router])
 
-    if (loading || !user || user.role_id !== "2") {
-        return <p>Loading...</p>
-    }
 
     return (
-        <div>
+        <DefaultUiComponent>
             <h1>Products Page (เฉพาะ role_id === 1)</h1>
-        </div>
+        </DefaultUiComponent>
     )
 }

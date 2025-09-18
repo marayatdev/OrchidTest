@@ -8,21 +8,27 @@ import {
 } from "@/components/ui/dropdown-menu";
 import api from "@/lib/axios";
 import { useRouter } from "next/navigation"
+import { useUser } from "@/context/UserContext";
+import { toast } from "sonner";
 
 const Navbar = () => {
     const router = useRouter()
     const [isOpen, setIsOpen] = useState(false);
+    const { user, setUser } = useUser();
 
     const Logout = async () => {
         try {
             const response = await api.post("/auth/logout")
 
             if (response.data.status === 200) {
-                router.push("/")
+                setUser(null); // <-- เพิ่มตรงนี้
                 localStorage.removeItem('user');
+                toast.success("ออกสู่ระบบสำเร็จ");
+                router.push("/")
             }
         } catch (err) {
             console.log(err)
+            toast.error("เกิดข้อผิดพลาดในการออกสู่ระบบ");
         }
     }
 
@@ -36,9 +42,11 @@ const Navbar = () => {
 
                 {/* กลาง - Menu (Desktop) */}
                 <div className="hidden md:flex justify-center gap-6">
-                    <h1 className="text-2xl font-bold text-white cursor-pointer">Home</h1>
-                    <h1 className="text-2xl font-bold text-white cursor-pointer">Profile</h1>
-                    <h1 className="text-2xl font-bold text-white cursor-pointer">Product</h1>
+                    <h1 className="text-2xl font-bold text-white cursor-pointer" onClick={() => router.push('/home')}>Home</h1>
+                    <h1 className="text-2xl font-bold text-white cursor-pointer" onClick={() => router.push('/profile')}>Profile</h1>
+                    {user?.role_id === 1 && (
+                        <h1 className="text-2xl font-bold text-white cursor-pointer" onClick={() => router.push('/products')}>Product</h1>
+                    )}
                 </div>
 
                 {/* ขวา - Username + Hamburger */}
@@ -48,7 +56,7 @@ const Navbar = () => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <h1 className="text-2xl font-bold text-white cursor-pointer">
-                                    username
+                                    {user?.username} {user?.role_id === 1 ? "(Admin)" : "(User)"}
                                 </h1>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent className="w-40 bg-white rounded-lg shadow-lg">
@@ -74,7 +82,7 @@ const Navbar = () => {
                     <h1 className="text-xl font-bold text-white cursor-pointer">Profile</h1>
                     <h1 className="text-xl font-bold text-white cursor-pointer">Product</h1>
                     {/* Username Menu แยกเป็น list ธรรมดา */}
-                    <h1 className="text-xl font-bold text-white cursor-pointer text-red-500">Logout</h1>
+                    <h1 className="text-xl font-bold text-white cursor-pointer text-red-500" onClick={() => Logout()}>Logout</h1>
                 </div>
             )}
         </div>

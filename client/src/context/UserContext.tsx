@@ -8,7 +8,7 @@ interface User {
     id: string;
     username: string;
     email: string;
-    role_id: string;
+    role_id: number;
 }
 
 interface UserContextType {
