@@ -110,7 +110,9 @@ export class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
-      ResponseFormatter.success(res, user, "Login successful");
+      const { password: _, ...userWithoutPassword } = user;
+
+      ResponseFormatter.success(res, userWithoutPassword, "Login successful");
     } catch (err) {
       logger.error("Login failed:", err);
       res.status(500).json({ message: "Internal server error" });
@@ -182,7 +184,7 @@ export class AuthController {
         sameSite: "strict",
       });
 
-      res.status(200).json({ message: "Logged out successfully" });
+      ResponseFormatter.success(res, "", "Logged out successfully");
       return;
     } catch (err) {
       console.error("Logout error:", err);

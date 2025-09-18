@@ -12,13 +12,13 @@ export default function ProductsPage() {
 
     useEffect(() => {
         if (!loading) {
-            if (!user || user.role_id !== "1") {
+            if (!user || user.role_id !== "2") {
                 router.replace("/home")
             }
         }
     }, [user, loading, router])
 
-    if (loading || !user || user.role_id !== "1") {
+    if (loading || !user || user.role_id !== "2") {
         return <p>Loading...</p>
     }
 

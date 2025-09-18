@@ -6,7 +6,7 @@ import { z } from "zod"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import api from "@/lib/axios"
-import { useRouter } from "next/navigation" // <-- ใช้ next/navigation สำหรับ client component
+import { useRouter } from "next/navigation"
 
 const loginSchema = z.object({
     username: z.string(),
@@ -16,7 +16,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>
 
 export default function LoginForm() {
-    const router = useRouter() // <-- router client
+    const router = useRouter()
     const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     })
@@ -25,10 +25,7 @@ export default function LoginForm() {
         try {
             const response = await api.post('/auth/login', data)
             const user = response.data.data
-
             console.log("user:", user);
-
-
             if (user.role_id === 1) {
                 router.push('/products')
             } else if (user.role_id === 2) {
@@ -45,13 +42,13 @@ export default function LoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             <div>
                 <label className="text-sm font-medium text-gray-700">Email</label>
-                <Input placeholder="m@example.com" {...register("username")} />
+                <Input placeholder="m@example.com" {...register("username")} value={"jengs"} />
                 {errors.username && <p className="text-red-500 text-sm">{errors.username.message}</p>}
             </div>
 
             <div>
                 <label className="text-sm font-medium text-gray-700">Password</label>
-                <Input type="password" {...register("password")} />
+                <Input type="password" {...register("password")} value={"123456789"} />
                 {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
             </div>
 
