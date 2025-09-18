@@ -78,9 +78,9 @@ const Navbar = () => {
             {/* เมนู Mobile */}
             {isOpen && (
                 <div className="flex flex-col items-center gap-4 mt-4 md:hidden">
-                    <h1 className="text-xl font-bold text-white cursor-pointer">Home</h1>
-                    <h1 className="text-xl font-bold text-white cursor-pointer">Profile</h1>
-                    <h1 className="text-xl font-bold text-white cursor-pointer">Product</h1>
+                    <h1 className="text-xl font-bold text-white cursor-pointer" onClick={() => router.push('/home')}>Home</h1>
+                    <h1 className="text-xl font-bold text-white cursor-pointer" onClick={() => router.push('/profile')}>Profile</h1>
+                    <h1 className="text-xl font-bold text-white cursor-pointer" onClick={() => router.push('/product')}>Product</h1>
                     {/* Username Menu แยกเป็น list ธรรมดา */}
                     <h1 className="text-xl font-bold text-white cursor-pointer text-red-500" onClick={() => Logout()}>Logout</h1>
                 </div>

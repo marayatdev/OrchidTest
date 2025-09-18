@@ -24,3 +24,21 @@ model users {
 
   @@index([role_id], map: "role_id")
 }
+
+model product_images {
+  id         Int       @id @default(autoincrement())
+  product_id Int?
+  image_url  String?   @db.VarChar(255)
+  products   products? @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "product_images_ibfk_1")
+
+  @@index([product_id], map: "product_id")
+}
+
+model products {
+  id             Int              @id @default(autoincrement())
+  name           String?          @db.VarChar(255)
+  description    String?          @db.Text
+  price          Decimal?         @db.Decimal(10, 2)
+  createdAt      DateTime?        @db.DateTime(0)
+  product_images product_images[]
+}

@@ -1,11 +1,14 @@
 import { Router } from "express";
+import { ProductController } from "@/controllers/product.controller";
 import { validate } from "@/middlewares/validate";
-import { UserController } from "@/controllers/users.controller";
 
 const router = Router();
-const userController = new UserController();
+const productController = new ProductController();
 
-router.put("/", /* validate(RegisterSchema), */ userController.updateUser);
+router.post(
+  "/",
+  /* validate(RegisterSchema), */ productController.createProduct
+);
 // router.post("/login", validate(LoginSchema), authController.login);
 // router.post("/refresh", authController.refresh);
 // router.post("/logout", authMiddleware, authController.logout);
