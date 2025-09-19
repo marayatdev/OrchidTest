@@ -39,8 +39,31 @@ export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([])
     const [page, setPage] = useState(1)
     const [totalPages, setTotalPages] = useState(1)
-    const [total, setTotal] = useState(0) // ✅ เก็บจำนวนสินค้าทั้งหมด
+    const [total, setTotal] = useState(0)
     const limit = 5
+
+    const fetchProducts = async () => {
+        try {
+            const res = await api.get<{
+                success: boolean
+                status: number
+                message: string
+                data: {
+                    data: Product[]
+                    total: number
+                    totalPages: number
+                    page: number
+                    limit: number
+                }
+            }>(`/product?page=${page}&limit=${limit}`)
+
+            setProducts(res.data.data.data)
+            setTotal(res.data.data.total)
+            setTotalPages(res.data.data.totalPages)
+        } catch (err) {
+            console.error("โหลดสินค้าไม่สำเร็จ:", err)
+        }
+    }
 
     useEffect(() => {
         if (!loading) {
@@ -50,40 +73,28 @@ export default function ProductsPage() {
         }
     }, [user, loading, router])
 
-    // โหลดสินค้าจาก backend
     useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const res = await api.get<{
-                    success: boolean
-                    status: number
-                    message: string
-                    data: {
-                        data: Product[]
-                        total: number
-                        totalPages: number
-                        page: number
-                        limit: number
-                    }
-                }>(`/product?page=${page}&limit=${limit}`)
-
-                setProducts(res.data.data.data)
-                setTotal(res.data.data.total) // ✅ เซ็ตค่า total
-                setTotalPages(res.data.data.totalPages)
-            } catch (err) {
-                console.error("โหลดสินค้าไม่สำเร็จ:", err)
-            }
-        }
-
         fetchProducts()
     }, [page])
 
+    // ฟังก์ชันลบสินค้า
+    const handleDelete = async (id: number) => {
+        if (!confirm("คุณแน่ใจหรือไม่ว่าจะลบสินค้านี้?")) return
+        try {
+            await api.delete(`/product/${id}`)
+            alert("ลบสินค้าสำเร็จ")
+            fetchProducts() // รีเฟรชรายการสินค้า
+        } catch (err) {
+            console.error("ลบสินค้าไม่สำเร็จ:", err)
+            alert("ลบสินค้าไม่สำเร็จ")
+        }
+    }
 
     return (
         <DefaultUiComponent>
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-xl font-bold">
-                    Products ({total} รายการ) {/* ✅ แสดงจำนวนรวม */}
+                    Products ({total} รายการ)
                 </h1>
                 <Button onClick={() => router.push("/products/0")}>
                     สร้างสินค้า
@@ -107,13 +118,20 @@ export default function ProductsPage() {
                             <TableCell>{product.name}</TableCell>
                             <TableCell>{product.price} บาท</TableCell>
                             <TableCell>{product.images.length}</TableCell>
-                            <TableCell className="text-right">
+                            <TableCell className="text-right flex gap-2 justify-end">
                                 <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={() => router.push(`/products/${product.id}`)}
                                 >
                                     แก้ไข
+                                </Button>
+                                <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => handleDelete(product.id)}
+                                >
+                                    ลบ
                                 </Button>
                             </TableCell>
                         </TableRow>

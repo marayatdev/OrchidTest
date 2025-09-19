@@ -101,21 +101,19 @@ export class ProductService {
     };
   }
 
+  // ดึง product พร้อม presigned URL
   public async readProductWithPresignedUrl(productId: number) {
-    // 1️⃣ ดึง product + images จาก DB
     const product = await this.prisma.products.findUnique({
       where: { id: productId },
       include: { product_images: true },
     });
-
     if (!product) return null;
 
-    // 2️⃣ สร้าง presigned URL สำหรับแต่ละรูป
     const images = await Promise.all(
       product.product_images
-        .filter((img) => img.image_url) // เอาเฉพาะที่มี URL
+        .filter((img) => img.image_url)
         .map(async (img) => {
-          const objectName = img.image_url!.split(`${BUCKET_NAME}/`)[1]; // ! เพราะกรอง null แล้ว
+          const objectName = img.image_url!.split(`${BUCKET_NAME}/`)[1];
           const url = await minioClient.presignedGetObject(
             BUCKET_NAME,
             objectName,
@@ -125,14 +123,59 @@ export class ProductService {
         })
     );
 
-    // 3️⃣ จัดโครงสร้าง response
     return {
       id: product.id,
       name: product.name,
       description: product.description,
       price: product.price,
       createdAt: product.createdAt,
-      images: images.filter(Boolean), // กรอง null
+      images: images.filter(Boolean),
     };
+  }
+
+  // ดึง product + images
+  public async getProductWithImages(productId: number) {
+    return this.prisma.products.findUnique({
+      where: { id: productId },
+      include: { product_images: true },
+    });
+  }
+
+  // ลบรูปออกจาก DB
+  public async deleteProductImages(ids: number[]) {
+    return this.prisma.product_images.deleteMany({
+      where: { id: { in: ids } },
+    });
+  }
+
+  // อัปเดต product
+  public async updateProduct(
+    productId: number,
+    data: { name: string; description: string; price: number }
+  ) {
+    return this.prisma.products.update({
+      where: { id: productId },
+      data,
+    });
+  }
+
+  // เพิ่มรูปใหม่เข้า DB
+  public async addProductImages(
+    images: { product_id: number; image_url: string }[]
+  ) {
+    return this.prisma.product_images.createMany({ data: images });
+  }
+
+  public async getAllProductsRaw() {
+    return this.prisma.products.findMany({
+      include: { product_images: true },
+      orderBy: { id: "desc" },
+    });
+  }
+
+  public async removeProduct(productId: number) {
+    return this.prisma.products.delete({
+      where: { id: productId },
+    });
   }
 }

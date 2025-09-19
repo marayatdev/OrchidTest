@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation"
+import { useUser } from "@/context/UserContext";
 
 
 interface Product {
@@ -35,14 +36,25 @@ export default function ProductEditCreatePage() {
     const router = useRouter()
     const params = useParams();
     const productId = Number(params.id);
+    const { user, loading } = useUser()
+
+    useEffect(() => {
+        if (!loading) {
+            if (!user || user?.role_id !== 1) {
+                router.replace("/home")
+            }
+        }
+    }, [user, loading, router])
 
     const [oldImages, setOldImages] = useState<string[]>([]);
     const [newFiles, setNewFiles] = useState<File[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loadingg, setLoading] = useState(false);
 
     const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<ProductForm>({
         resolver: zodResolver(productSchema),
     });
+
+
 
     // โหลดข้อมูล product ถ้า id !== 0
     useEffect(() => {
@@ -86,6 +98,8 @@ export default function ProductEditCreatePage() {
     };
 
     const removeNewFile = (index: number) => {
+        console.log(index);
+
         setNewFiles(prev => prev.filter((_, i) => i !== index));
     };
 
@@ -101,21 +115,26 @@ export default function ProductEditCreatePage() {
         formData.append("price", data.price.toString());
         newFiles.forEach(file => formData.append("images", file));
 
+        // แปลง oldImages (presigned URL) → ชื่อไฟล์จริง
+        const oldFileNames = oldImages.map(url => {
+            const fullFileName = url.split('/').pop()!;         // "1758294013769_ChatGPT Image 13 ...png?X-Amz-Algorithm=AWS4..."
+            return decodeURIComponent(fullFileName.split('?')[0]); // ตัด query string ออก
+        });
+        formData.append("oldImages", JSON.stringify(oldFileNames));
+
         try {
             setLoading(true);
             if (productId === 0) {
-                // Create
                 const res = await api.post("/product", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
                 router.replace("/products")
                 alert("Product created successfully! ID: " + res.data.productId);
             } else {
-                // Edit / update
-                formData.append("oldImages", JSON.stringify(oldImages)); // ส่งรูปเก่าให้ backend
                 const res = await api.put(`/product/${productId}`, formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
+                router.replace("/products")
                 alert("Product updated successfully!");
             }
             reset();
@@ -129,7 +148,8 @@ export default function ProductEditCreatePage() {
         }
     };
 
-    if (loading) {
+
+    if (loadingg) {
         return <DefaultUiComponent><p>Loading...</p></DefaultUiComponent>;
     }
 
@@ -219,8 +239,8 @@ export default function ProductEditCreatePage() {
                     )}
                 </div>
 
-                <Button type="submit" disabled={loading}>
-                    {loading ? (productId === 0 ? "Creating..." : "Updating...") : (productId === 0 ? "Create Product" : "Update Product")}
+                <Button type="submit" disabled={loadingg}>
+                    {loadingg ? (productId === 0 ? "Creating..." : "Updating...") : (productId === 0 ? "Create Product" : "Update Product")}
                 </Button>
             </form>
         </DefaultUiComponent>

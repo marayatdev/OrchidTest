@@ -7,7 +7,7 @@ export type Product = {
 
 export type ProductImage = {
   id?: number;
-  product_id: number;
+  product_id: number | null;
   image_url: string;
 };
 
