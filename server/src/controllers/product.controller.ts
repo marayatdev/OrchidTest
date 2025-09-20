@@ -98,9 +98,14 @@ export class ProductController {
         return res.status(404).json({ message: "Product not found" });
 
       // 2️⃣ หารูปที่ถูกลบ (รูปเก่าที่ไม่ได้อยู่ใน oldImages)
-      const removedImages = product.product_images.filter(
-        (img) => !oldImages.includes(img.image_url!)
+      const oldImageFiles = oldImages.map((url: string) =>
+        decodeURIComponent(url.split("/").pop()!)
       );
+
+      const removedImages = product.product_images.filter((img) => {
+        const fileName = decodeURIComponent(img.image_url!.split("/").pop()!);
+        return !oldImageFiles.includes(fileName);
+      });
 
       // 3️⃣ ลบไฟล์จาก MinIO และ DB
       for (const img of removedImages) {
@@ -243,6 +248,8 @@ export class ProductController {
   public removeProduct = async (req: Request, res: Response) => {
     try {
       const productId = Number(req.params.id);
+
+      console.log("productId", productId);
 
       if (isNaN(productId))
         return res.status(400).json({ message: "Invalid product id" });

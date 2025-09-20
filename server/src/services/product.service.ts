@@ -174,8 +174,18 @@ export class ProductService {
   }
 
   public async removeProduct(productId: number) {
-    return this.prisma.products.delete({
-      where: { id: productId },
+    const result = await this.prisma.$transaction(async (tx) => {
+      await tx.product_images.deleteMany({
+        where: { product_id: productId },
+      });
+
+      const deletedProduct = await tx.products.delete({
+        where: { id: productId },
+      });
+
+      return { productId: deletedProduct.id };
     });
+
+    return result;
   }
 }
