@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const api = axios.create({
   baseURL: "http://localhost:8000/api",
@@ -26,32 +27,29 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then(() => {
-            return api(originalRequest);
-          })
-          .catch((err) => {
-            return Promise.reject(err);
+        try {
+          await new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
           });
+          return api(originalRequest);
+        } catch (err) {
+          return Promise.reject(err);
+        }
       }
 
       originalRequest._retry = true;
       isRefreshing = true;
 
       try {
-        const response = await api.post(
-          "/auth/refresh",
-          {},
-          { withCredentials: true }
-        );
+        const response = await api.post("/auth/refresh", {});
+
         if (response.data.status === 200) {
           processQueue(null);
           return api(originalRequest);
         }
       } catch (refreshError) {
         processQueue(refreshError);
+        window.location.href = "/";
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
