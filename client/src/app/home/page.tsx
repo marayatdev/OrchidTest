@@ -144,7 +144,7 @@ export default function HomePage() {
                             <div className="p-4">
                                 <h2 className="font-semibold text-lg">{product.name}</h2>
                                 <p className="text-gray-500 text-sm my-1">{product.description}</p>
-                                <p className="font-bold text-blue-600">${product.price}</p>
+                                <p className="font-bold text-blue-600">{product.price}</p>
                             </div>
                         </div>
                     ))}

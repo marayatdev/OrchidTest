@@ -16,11 +16,9 @@ export class ProductController {
 
   public listProducts = async (req: Request, res: Response) => {
     try {
-      // รับ page / limit จาก query (ค่า default: page=1, limit=10)
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
 
-      // เรียก method listProducts() ของ service
       const result = await this.productService.listProducts(page, limit);
 
       return ResponseFormatter.success(
@@ -63,7 +61,6 @@ export class ProductController {
         })
       );
 
-      // เรียก service สร้าง product พร้อม images URL
       const result = await this.productService.createProduct(
         data,
         imagesWithUrls

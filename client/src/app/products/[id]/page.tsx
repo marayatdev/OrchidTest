@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation"
 import { useUser } from "@/context/UserContext";
-
+import { toast } from "sonner";
 
 interface Product {
     id: number;
@@ -56,7 +56,6 @@ export default function ProductEditCreatePage() {
 
 
 
-    // โหลดข้อมูล product ถ้า id !== 0
     useEffect(() => {
         if (productId === 0) return;
 
@@ -115,10 +114,9 @@ export default function ProductEditCreatePage() {
         formData.append("price", data.price.toString());
         newFiles.forEach(file => formData.append("images", file));
 
-        // แปลง oldImages (presigned URL) → ชื่อไฟล์จริง
         const oldFileNames = oldImages.map(url => {
-            const fullFileName = url.split('/').pop()!;         // "1758294013769_ChatGPT Image 13 ...png?X-Amz-Algorithm=AWS4..."
-            return decodeURIComponent(fullFileName.split('?')[0]); // ตัด query string ออก
+            const fullFileName = url.split('/').pop()!;
+            return decodeURIComponent(fullFileName.split('?')[0]);
         });
         formData.append("oldImages", JSON.stringify(oldFileNames));
 
@@ -129,20 +127,20 @@ export default function ProductEditCreatePage() {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
                 router.replace("/products")
-                alert("Product created successfully! ID: " + res.data.productId);
+                toast.success("สร้างสินค้าสำเร็จ");
             } else {
                 const res = await api.put(`/product/${productId}`, formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
                 router.replace("/products")
-                alert("Product updated successfully!");
+                toast.success("แก้ไขสินค้าสำเร็จ");
             }
             reset();
             setNewFiles([]);
             if (productId === 0) setOldImages([]);
         } catch (err: any) {
             console.error(err);
-            alert(err.response?.data?.message || "Operation failed");
+            toast.error("ทำรายการไม่สำเร็จ");
         } finally {
             setLoading(false);
         }

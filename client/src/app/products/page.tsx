@@ -23,6 +23,7 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination"
 import api from "@/lib/axios"
+import { toast } from "sonner";
 
 interface Product {
     id: number
@@ -83,10 +84,11 @@ export default function ProductsPage() {
         try {
             await api.delete(`/product/${id}`)
             alert("ลบสินค้าสำเร็จ")
+            toast.success("ลบสินค้าสำเร็จ");
             fetchProducts() // รีเฟรชรายการสินค้า
         } catch (err) {
             console.error("ลบสินค้าไม่สำเร็จ:", err)
-            alert("ลบสินค้าไม่สำเร็จ")
+            toast.error("ลบสินค้าไม่สำเร็จ");
         }
     }
 
